@@ -1,0 +1,24 @@
+# Trim Atlas
+
+На данный момент движок Defold не умеет в тримминг (отсечение пустых областей) у спрайтов. Его *тримминг* уменьшает размер геометрии спрайта, но занимаемое место в атласе текстуры остается прежним. Начиная с версии 1.9.8 в Defold’е появилась поддержка *pivot points* у спрайтов внутри атласа, что дало возможность реализовать для них *правильный* тримминг. Пример работы этого скрипта:
+
+![example](https://github.com/maltsevda/trim_atlas/script_logo.png)
+
+## Зависимости
+
+* Python 3.5 и выше + PIP:
+  * `> python -m pip install --upgrade pip`
+* [Библиотека DefTree](https://deftree.readthedocs.io/en/latest/):
+  * `> python -m pip install --upgrade deftree`
+* [Библиотка Pillow](https://pypi.org/project/pillow/):
+  * `> python -m pip install --upgrade Pillow`
+
+## Как использовать скрипт
+
+* Установить все необходимые зависимости
+* Скопировать скрипт [trim_atlas.py](https://github.com/maltsevda/trim_atlas/trim_atlas.py) в папку с проектом. Т.е. он должен лежать либо рядом с файлом `game.project`, либо в одной из вложенных папок.
+* Запустить скрипт, указав в качестве параметра имя атласа. Например:
+  * `> python trim_atlas.py assets/images/example.atlas`
+* Если добавить опцию `-b`, то для каждого изменённого файла скрипт создаст его исходную bak-копию.
+
+В атласе скрипт изменит только значения у атрибутов `pivot_x` и `pivot_y`. Все остальные параметры останутся неизменными.
