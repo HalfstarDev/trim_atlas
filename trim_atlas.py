@@ -107,7 +107,7 @@ def main(ns: argparse.Namespace):
     atlas_path = os.path.abspath(ns.filename)
     if not os.path.isfile(atlas_path):
         return False, 'Atlas file not found!'
-    project_dir = get_project_dir(sys.argv[0])
+    project_dir = get_project_dir(atlas_path)
     if not project_dir:
         return False, f'{PROJECT_NAME} not found!'
     # Backuping the atlas file

@@ -13,6 +13,7 @@ import argparse
 # ------------------------------------------------------------------------------
 
 ALLOWED_FORMATS = ['.png', '.jpg']
+PROJECT_NAME = 'game.project'
 
 # ------------------------------------------------------------------------------
 # Auxiliary functions
@@ -24,13 +25,23 @@ def is_image(entry: os.DirEntry):
         return ext in ALLOWED_FORMATS
     return False
 
+# Finds the root folder of the Defold project (based on the script location)
+def get_project_dir(filename: str) -> str:
+    absname = os.path.abspath(filename)
+    dir = os.path.dirname(absname)
+    while True:
+        project_path = os.path.join(dir, PROJECT_NAME)
+        if os.path.exists(project_path):
+            return dir
+        if os.path.ismount(dir):
+            return None
+        dir = os.path.dirname(dir)
+
 # ------------------------------------------------------------------------------
 # Functions for creating atlas from folder structure
 # ------------------------------------------------------------------------------
 
-def make_atlas(ns: argparse.Namespace):
-    base_name = os.path.normpath(ns.foldername)
-    base_dir = os.path.abspath(base_name)
+def make_atlas(base_dir, assets_dir):
     if not os.path.isdir(base_dir):
         return 1, 'Base directory not found!'
     # Parse folder structure for images and animations
@@ -53,6 +64,7 @@ def make_atlas(ns: argparse.Namespace):
                     anim['images'].append(entry.name)
     # Creating and writing the atlas file
     atlas_name = os.path.basename(base_dir) + '.atlas'
+    atlas_name = os.path.join(os.path.dirname(base_dir), atlas_name)
     with open(atlas_name, 'wt') as atlas:
         # Writing all animations
         for anim in animations:
@@ -61,14 +73,14 @@ def make_atlas(ns: argparse.Namespace):
             atlas.write(f'  id: "{anim_name}"\n')
             for image in anim['images']:
                 atlas.write( '  images {\n')
-                atlas.write(f'    image: "{ns.assets_dir}/{base_name}/{anim_name}/{image}"\n')
+                atlas.write(f'    image: "{assets_dir}/{anim_name}/{image}"\n')
                 atlas.write( '  }\n')
             atlas.write( 'playback: PLAYBACK_LOOP_FORWARD\n')
             atlas.write( '}\n')
         # Writing all single images
         for image in images:
             atlas.write( 'images {\n')
-            atlas.write(f'  image: "{ns.assets_dir}/{base_name}/{image}"\n')
+            atlas.write(f'  image: "{assets_dir}/{image}"\n')
             atlas.write( '}\n')
         # Writing additional atlas parameters
         atlas.write('extrude_borders: 2')
@@ -78,13 +90,21 @@ def make_atlas(ns: argparse.Namespace):
 # Main entry point
 # ------------------------------------------------------------------------------
 
+def main(ns):
+    base_dir = os.path.abspath(ns.foldername)
+    project_dir = get_project_dir(base_dir)
+    if not project_dir:
+        return False, f'{PROJECT_NAME} not found!'
+    assets_dir = base_dir[len(project_dir):]
+    assets_dir = assets_dir.replace('\\', '/')
+    return make_atlas(base_dir, assets_dir)
+
 if __name__ == '__main__':
     # Parsing command arguments
     parser = argparse.ArgumentParser(description='Make Defold atlas from the giving folder.')
     parser.add_argument('foldername', type=str, help='The name of the folder with images.')
-    parser.add_argument('-a', '--assets_dir', default='/assets', help='Assets folder inside Defold project (default: "/assets")')
     namespace = parser.parse_args()
     # Running atlas generation
-    err, msg = make_atlas(namespace)
+    err, msg = main(namespace)
     if err:
         print(f'Error ({err}): {msg}')
