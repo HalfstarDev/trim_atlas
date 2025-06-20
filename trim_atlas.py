@@ -21,7 +21,7 @@ ELEMENT_IMAGES = 'images'
 ATTR_IMAGE = 'image'
 ATTR_PIVOT_X = 'pivot_x'
 ATTR_PIVOT_Y = 'pivot_y'
-ATTR_BORDERS = 'extrude_borders'
+ATTR_BORDERS = 'inner_padding'
 EXT_BAK = '.bak'
 
 # ------------------------------------------------------------------------------
